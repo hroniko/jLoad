@@ -26,6 +26,10 @@ public class FileInfo {
         this.dateModified = dateModified;
     }
 
+    public FileInfo(String fullName) {
+        this.fullName = fullName;
+    }
+
     public FileInfo(File file) {
         String name = "";
         String ext = "";

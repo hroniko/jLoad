@@ -2,12 +2,15 @@ package com.hroniko.jload.actions;
 
 
 import com.hroniko.jload.entities.ActiveHost;
+import com.hroniko.jload.entities.FileInfo;
+import com.hroniko.jload.entities.FileRoute;
 import com.hroniko.jload.utils.converters.ResultLineConverter;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hroniko.jload.utils.constants.CommandConstants.*;
 import static com.hroniko.jload.utils.constants.CommandConstants.GET_WHO_DEBUG_PORT;
@@ -55,6 +58,23 @@ public class MainProcessor {
 
         // 1 Определяем разницу во времени между удаленным сервером TBAPI и локальным компьютером
         //String createTxt = ShellExecutor.shell(hostname, GET_WHO_DEBUG_PORT_16955);
+        FileRoute fileRoutes = new FileRoute();
+
+
+        List<FileRoute> fileRouteList = files.stream()
+                .map(FileInfo::new)
+                .map(FileRoute::new)
+                .map(fileRoute -> {
+                    String localFileName = fileRoute.getLocalFile().getName();
+                    String localFileExt = fileRoute.getLocalFile().getExtension();
+                    String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + localFileName + "*." + localFileExt);
+                    List<String> serverFiles = Arrays.asList(result.split("\n"));
+
+                    for (String fileName : serverFiles){
+                        fileRoute.getServerFiles().add(new FileInfo(fileName));
+                    }
+                    return fileRoute;
+                }).collect(Collectors.toList());
 
         String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + files.get(0).getName());
 //        if (result.contains("ESTABLISHED")){

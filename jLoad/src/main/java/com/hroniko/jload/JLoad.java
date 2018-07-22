@@ -48,9 +48,15 @@ public class JLoad {
             System.out.println("[1] " + file.getName());
         }
 
-        File file = lst.get(0);
-        FileInfo fileInfo = new FileInfo(file);
-        System.out.println("Hop");
+        // File file = lst.get(0);
+//        FileInfo fileInfo = new FileInfo(file);
+//        System.out.println("Hop");
+
+
+        MainProcessor mp = new MainProcessor();
+        String result = mp.run(host, lst);
+
+
 
         // MainProcessor mp = new MainProcessor();
         // String result = mp.run(host, lst);
