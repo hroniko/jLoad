@@ -1,6 +1,8 @@
 package com.hroniko.jload;
 
 import com.hroniko.jload.actions.MainProcessor;
+import com.hroniko.jload.actions.ScpTo;
+import com.hroniko.jload.actions.Sftp;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class JLoad {
     public static void main(String[] args) throws InterruptedException {
-        Scanner in = new Scanner(System.in);
+        /*Scanner in = new Scanner(System.in);
 
         System.out.println("App for upload jar files to toms");
 
@@ -51,6 +53,9 @@ public class JLoad {
 
         System.out.println("Found 1 files on server:");
         System.out.println(result);
+        */
+
+        Sftp.shell("10.101.46.26", "put /media/hroniko/DATA/WORK/jLoad/README.md /u02/netcracker/toms/u39_i2_6955/logs/anbe/README.md");
 
 
 //        while (true){

@@ -10,7 +10,7 @@ import java.io.InputStream;
 import static com.hroniko.jload.utils.constants.ConnectionConstants.*;
 
 public class ScpTo {
-    public static void uploadFile(String hostname, String rfile){
+    public static void uploadFile(String hostname, String lfile, String rfile){
         FileInputStream fis=null;
         try{
 
@@ -19,14 +19,13 @@ public class ScpTo {
             Integer port = PORT;
 
             //String lfile=arg[0];
-            String lfile="";
 //            String user=arg[1].substring(0, arg[1].indexOf('@'));
 //            arg[1]=arg[1].substring(arg[1].indexOf('@')+1);
 //            String host=arg[1].substring(0, arg[1].indexOf(':'));
 //            String rfile=arg[1].substring(arg[1].indexOf(':')+1);
 
             JSch jsch=new JSch();
-            Session session=jsch.getSession(user, host, 22);
+            Session session=jsch.getSession(user, host, port);
 
             // username and password will be given via UserInfo interface.
             UserInfo ui=new MyUserInfo();
@@ -36,7 +35,8 @@ public class ScpTo {
             boolean ptimestamp = true;
 
             // exec 'scp -t rfile' remotely
-            String command="scp " + (ptimestamp ? "-p" :"") +" -t "+rfile;
+//            String command="scp " + (ptimestamp ? "-p" :"") +" -t "+rfile;
+            String command="sftp " + (ptimestamp ? "-p" :"") +" -t "+rfile;
             Channel channel=session.openChannel("exec");
             ((ChannelExec)channel).setCommand(command);
 
