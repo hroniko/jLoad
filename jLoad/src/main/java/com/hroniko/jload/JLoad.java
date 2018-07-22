@@ -3,6 +3,7 @@ package com.hroniko.jload;
 import com.hroniko.jload.actions.MainProcessor;
 import com.hroniko.jload.actions.ScpTo;
 import com.hroniko.jload.actions.Sftp;
+import com.hroniko.jload.entities.FileInfo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class JLoad {
     public static void main(String[] args) throws InterruptedException {
-        /*Scanner in = new Scanner(System.in);
+        Scanner in = new Scanner(System.in);
 
         System.out.println("App for upload jar files to toms");
 
@@ -26,7 +27,7 @@ public class JLoad {
         if (path == null || path.length() == 0){
 //            path = "."; 127.0.0.1
 //            File dir1 = new File(path); //path указывает на директорию
-            path = "./target/tmp"; // path = "/media/hroniko/DATA/WORK/SCRIPT_LOAD/jLoad/target/tmp";
+            path = "./tmp"; // path = "/media/hroniko/DATA/WORK/SCRIPT_LOAD/jLoad/target/tmp";
             File dir = new File(path); //path указывает на директорию
             File[] arrFiles = dir.listFiles();
             if (arrFiles == null) {
@@ -47,15 +48,20 @@ public class JLoad {
             System.out.println("[1] " + file.getName());
         }
 
+        File file = lst.get(0);
+        FileInfo fileInfo = new FileInfo(file);
+        System.out.println("Hop");
 
-        MainProcessor mp = new MainProcessor();
-        String result = mp.run(host, lst);
+        // MainProcessor mp = new MainProcessor();
+        // String result = mp.run(host, lst);
 
-        System.out.println("Found 1 files on server:");
-        System.out.println(result);
-        */
+        // System.out.println("Found 1 files on server:");
+        // System.out.println(result);
 
-        Sftp.shell("10.101.46.26", "put /media/hroniko/DATA/WORK/jLoad/README.md /u02/netcracker/toms/u39_i2_6955/logs/anbe/README.md");
+
+
+
+        // Sftp.shell("10.101.46.26", "put /media/hroniko/DATA/WORK/jLoad/README.md /u02/netcracker/toms/u39_i2_6955/logs/anbe/README.md");
 
 
 //        while (true){
