@@ -4,12 +4,18 @@ package com.hroniko.jload.actions;
 import com.hroniko.jload.entities.ActiveHost;
 import com.hroniko.jload.entities.FileInfo;
 import com.hroniko.jload.entities.FileRoute;
+import com.hroniko.jload.utils.converters.DateConverter;
+import com.hroniko.jload.utils.converters.LsInfoAboutFileConverter;
 import com.hroniko.jload.utils.converters.ResultLineConverter;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import static com.hroniko.jload.utils.constants.CommandConstants.*;
@@ -20,6 +26,7 @@ import static com.hroniko.jload.utils.constants.ConnectionConstants.HOSTNAME_LIS
 
 public class MainProcessor {
 
+    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Logger LOGGER = Logger.getLogger(MainProcessor.class);
 
     private static ActiveHost currentHost = null;
@@ -60,7 +67,7 @@ public class MainProcessor {
         //String createTxt = ShellExecutor.shell(hostname, GET_WHO_DEBUG_PORT_16955);
         FileRoute fileRoutes = new FileRoute();
 
-
+        // 1. Построение маршрутов замены файлов с информацией о файлах
         List<FileRoute> fileRouteList = files.stream()
                 .map(FileInfo::new)
                 .map(FileRoute::new)
@@ -70,13 +77,90 @@ public class MainProcessor {
                     String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + localFileName + "*." + localFileExt);
                     List<String> serverFiles = Arrays.asList(result.split("\n"));
 
-                    for (String fileName : serverFiles){
-                        fileRoute.getServerFiles().add(new FileInfo(fileName));
+                    for (String fullPath : serverFiles){
+                        //fileRoute.getServerFiles().add(new FileInfo(fileName));
+                        String infoAboutFile = ShellExecutor.shell(hostname, GET_INFO_ABOUT_FILE + fullPath);
+                        FileInfo serverFileInfo = LsInfoAboutFileConverter.convert(infoAboutFile);
+                        fileRoute.getServerFiles().add(serverFileInfo);
                     }
                     return fileRoute;
                 }).collect(Collectors.toList());
 
-        String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + files.get(0).getName());
+        // 2. Вывод информации о маршрутах
+        System.out.println("Files will be replace from local to server:");
+        fileRouteList.forEach(fileRoute -> {
+            String localFileFullName = fileRoute.getLocalFile().getFullName();
+            if (fileRoute.getServerFiles() != null && fileRoute.getServerFiles().size() != 0){
+                // System.out.print(localFileFullName + " --> ");
+                // String.join("", Collections.nCopies(n, " ")); // Генерировать строку из п штук пробелов
+                for (FileInfo serverFile : fileRoute.getServerFiles()){
+                    System.out.println(localFileFullName + " "
+                            + fileRoute.getLocalFile().info()
+                            + " --> "
+                            + serverFile.info() + " "
+                            + "[" + hostname + "] " + serverFile.getFullPath());
+                }
+
+            } else {
+                System.out.println(localFileFullName + " not found on server [" + hostname + "]");
+            }
+
+
+        });
+
+        // 3. Спрашиваем о продолжении
+        System.out.println("Do you want to continue? (Y/n)");
+        Scanner in = new Scanner(System.in);
+        String answer = in.nextLine();
+        if (!(answer == null || answer.length() == 0 || answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes") )){
+            System.out.println("Process was stopped by user");
+            return "ok";
+        }
+        // иначе продолжаем
+
+        // 4. Переименовываем файл (делаем бекап) и копируем локальный на сервер
+        System.out.println("Loading files to server:");
+        fileRouteList.stream()
+                .filter(fileRoute -> fileRoute.getServerFiles() != null && fileRoute.getServerFiles().size() > 0) // оставляем только те, которые нашли на сервере
+                .peek(fileRoute -> {
+                    for(FileInfo serverFileInfo : fileRoute.getServerFiles()){
+                        // бекапим
+                        String backup = serverFileInfo.getFullPath() + ".backup_" + DateConverter.sysdate(); // но лучше брать сисдейт сервера
+                        String result = ShellExecutor.shell(hostname,
+                                RENAME_FILE + serverFileInfo.getFullPath() + " "
+                                        + backup);
+                        // Загружаем
+                        Sftp.shell(hostname,
+                                UPLOAD_FILE_FROM_LOCAL_TO_SERVER + fileRoute.getLocalFile().getFullPath() + " "
+                                        + serverFileInfo.getFullPath());
+
+                        // Обновляем информацию о файле на сервере
+                        String infoAboutFile = ShellExecutor.shell(hostname, GET_INFO_ABOUT_FILE + serverFileInfo.getFullPath());
+                        serverFileInfo = LsInfoAboutFileConverter.convert(infoAboutFile);
+                        //fileRoute.getServerFiles().add(serverFileInfo);
+
+                        // Информируем пользователя
+                        System.out.println(fileRoute.getLocalFile().getFullName() + " "
+                                + fileRoute.getLocalFile().info()
+                                + " OK, backup "
+                                + serverFileInfo.info() + " "
+                                + "[" + hostname + "] " + backup);
+
+                        // Логируем в локальный журнал
+                        String logMessage = DateConverter.sysdate() + " upload: "
+                                + fileRoute.getLocalFile().getFullPath() + " "
+                                + fileRoute.getLocalFile().info()
+                                + " --> "
+                                + serverFileInfo.info() + " "
+                                + "[" + hostname + "] " + serverFileInfo.getFullPath() + "; backup to "
+                                + backup;
+                        LOGGER.info(logMessage);
+
+                    }
+                }).collect(Collectors.toList());
+
+
+        // String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + files.get(0).getName());
 //        if (result.contains("ESTABLISHED")){
 //            ActiveHost activeHost = ResultLineConverter.convert(result);
 //            if (currentHost == null){
@@ -102,7 +186,7 @@ public class MainProcessor {
 //        }
 
 
-        return  result;
+        return  "ok";
     }
 
 

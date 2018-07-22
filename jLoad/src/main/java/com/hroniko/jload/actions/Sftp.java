@@ -352,7 +352,7 @@ public class Sftp{
         catch(Exception e){
             System.out.println(e);
         }
-        System.exit(0);
+        // System.exit(0);
     }
 
     public static class MyUserInfo implements UserInfo, UIKeyboardInteractive{

@@ -1,6 +1,9 @@
 package com.hroniko.jload.entities;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class FileInfo {
@@ -12,6 +15,9 @@ public class FileInfo {
 
     private Long size;
     private Date dateModified;
+
+    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static DateFormat dateFormatForBackup = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
 
     public FileInfo() {
     }
@@ -26,8 +32,10 @@ public class FileInfo {
         this.dateModified = dateModified;
     }
 
-    public FileInfo(String fullName) {
-        this.fullName = fullName;
+    public FileInfo(String fullPath) {
+        this.fullPath = fullPath;
+
+
     }
 
     public FileInfo(File file) {
@@ -105,5 +113,16 @@ public class FileInfo {
 
     public void setDateModified(Date dateModified) {
         this.dateModified = dateModified;
+    }
+
+    /* Info */
+
+    public String info(){
+        return "(" + new DecimalFormat("#0.00").format((getSize() + 0.0)/1024) + " kB, mf "
+                + dateFormat.format(getDateModified()) + ")";
+    }
+
+    public String dateTimeForBackup(){
+        return dateFormatForBackup.format(getDateModified());
     }
 }

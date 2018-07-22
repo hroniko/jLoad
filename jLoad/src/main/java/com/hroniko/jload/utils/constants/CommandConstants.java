@@ -26,4 +26,15 @@ public interface CommandConstants {
 
 
     String GET_FIND_FILE_WITH_NAME = "find /u02/netcracker/toms/u39_i2_6955 -name "; // + добавить имя файла в кавычкаъ
+
+    String GET_INFO_ABOUT_FILE = "ls -l --time-style=\"+%Y-%m-%d %H:%M:%S\" "; // + добавить полный путь до файла
+    // ls -l /путь_до_файла.jar
+    // Вернет
+    // -rw-r--r-- 1 user user 423341 2018-07-18 11:30:03 /путь_до_файла.jar
+
+    // ls -l --time-style="+%Y-%m-%d" // Форматирование вывода времени
+
+    String RENAME_FILE = "mv "; // + добавить имя старого файла + имя нового файла: mv file newfile
+
+    String UPLOAD_FILE_FROM_LOCAL_TO_SERVER = "put "; // + добавить имя локального файла + имя серверного файла: put /media/hroniko/DATA/WORK/jLoad/README.md /u02/netcracker/toms/u39_i2_6955/logs/anbe/README.md
 }
