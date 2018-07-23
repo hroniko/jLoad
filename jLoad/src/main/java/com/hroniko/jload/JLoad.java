@@ -1,19 +1,15 @@
 package com.hroniko.jload;
 
 import com.hroniko.jload.actions.MainProcessor;
-import com.hroniko.jload.actions.ScpTo;
-import com.hroniko.jload.actions.Sftp;
-import com.hroniko.jload.entities.FileInfo;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 public class JLoad {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args){
         Scanner in = new Scanner(System.in);
 
         System.out.println("App for upload jar files to toms");
@@ -48,35 +44,9 @@ public class JLoad {
             System.out.println("[1] " + file.getName());
         }
 
-        // File file = lst.get(0);
-//        FileInfo fileInfo = new FileInfo(file);
-//        System.out.println("Hop");
-
 
         MainProcessor mp = new MainProcessor();
         String result = mp.run(host, lst);
-
-
-
-        // MainProcessor mp = new MainProcessor();
-        // String result = mp.run(host, lst);
-
-        // System.out.println("Found 1 files on server:");
-        // System.out.println(result);
-
-
-
-
-        // Sftp.shell("10.101.46.26", "put /media/hroniko/DATA/WORK/jLoad/README.md /u02/netcracker/toms/u39_i2_6955/logs/anbe/README.md");
-
-
-//        while (true){
-////            mp.run("10.101.46.26");
-//            mp.run("localhost");
-////            String result = mp.run("localhost");
-//            // if (result.contains("ActiveHost")) System.out.println(result);
-//            TimeUnit.SECONDS.sleep(2);
-//        }
 
     }
 }
