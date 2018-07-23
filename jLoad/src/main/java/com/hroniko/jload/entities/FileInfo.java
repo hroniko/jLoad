@@ -51,7 +51,7 @@ public class FileInfo {
         this.fullName = fullName;
         this.name = name;
         this.extension = ext;
-        this.fullPath = file.getAbsolutePath().replace("/./", "/");
+        this.fullPath = file.getAbsolutePath().replace("/./", "/").replace("\\.\\", "\\");
         this.dir = this.fullPath.substring(0, fullPath.length() - fullName.length() - 1);
         this.size = file.length();
         this.dateModified = new Date(file.lastModified());

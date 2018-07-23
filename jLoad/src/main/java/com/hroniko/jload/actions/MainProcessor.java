@@ -74,9 +74,12 @@ public class MainProcessor {
                 .map(fileRoute -> {
                     String localFileName = fileRoute.getLocalFile().getName();
                     String localFileExt = fileRoute.getLocalFile().getExtension();
-                    String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + localFileName + "*." + localFileExt);
+                    String correctLocalFileName = localFileName.replaceAll("(-)*([0-9]+\\.)*[0-9](-)*(SNAPSHOT)*", ""); // удаляем информацию о версии
+                    String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + correctLocalFileName + "*." + localFileExt); // String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + localFileName + "*." + localFileExt);
+                    if (result.length() == 0){
+                        return fileRoute;
+                    }
                     List<String> serverFiles = Arrays.asList(result.split("\n"));
-
                     for (String fullPath : serverFiles){
                         //fileRoute.getServerFiles().add(new FileInfo(fileName));
                         String infoAboutFile = ShellExecutor.shell(hostname, GET_INFO_ABOUT_FILE + fullPath);
@@ -90,7 +93,7 @@ public class MainProcessor {
         System.out.println("Files will be replace from local to server:");
         fileRouteList.forEach(fileRoute -> {
             String localFileFullName = fileRoute.getLocalFile().getFullName();
-            if (fileRoute.getServerFiles() != null && fileRoute.getServerFiles().size() != 0){
+            if (fileRoute.getServerFiles() != null && fileRoute.getServerFiles().size() != 0){ // if (fileRoute.getServerFiles() != null && fileRoute.getServerFiles().size() != 0){
                 // System.out.print(localFileFullName + " --> ");
                 // String.join("", Collections.nCopies(n, " ")); // Генерировать строку из п штук пробелов
                 for (FileInfo serverFile : fileRoute.getServerFiles()){
@@ -118,14 +121,26 @@ public class MainProcessor {
         }
         // иначе продолжаем
 
-        // 4. Переименовываем файл (делаем бекап) и копируем локальный на сервер
+        // 4. Получаем имя локальной машины и логируем в файл на сервере
+        String localHostname = ShellExecutor.shell(hostname, GET_LOCAL_MACHINE_NAME);
+        if (localHostname != null && localHostname.length() > 0) {
+            localHostname = localHostname.substring(0, localHostname.length()-2);
+        } else {
+            localHostname = "unknown.host";
+        }
+        final String locHost = localHostname;
+
+        // 5. Переименовываем файл (делаем бекап) и копируем локальный на сервер
         System.out.println("Loading files to server:");
         fileRouteList.stream()
                 .filter(fileRoute -> fileRoute.getServerFiles() != null && fileRoute.getServerFiles().size() > 0) // оставляем только те, которые нашли на сервере
                 .peek(fileRoute -> {
                     for(FileInfo serverFileInfo : fileRoute.getServerFiles()){
+                        // Получаем информацию о времени хоста
+                        String serverSysdate = ShellExecutor.shell(hostname, GET_SERVER_SYSDATE_);
+
                         // бекапим
-                        String backup = serverFileInfo.getFullPath() + ".backup_" + DateConverter.sysdate(); // но лучше брать сисдейт сервера
+                        String backup = serverFileInfo.getFullPath() + ".backup_" + serverSysdate; // + серверное время // DateConverter.sysdate(); // но лучше брать сисдейт сервера
                         String result = ShellExecutor.shell(hostname,
                                 RENAME_FILE + serverFileInfo.getFullPath() + " "
                                         + backup);
@@ -153,11 +168,22 @@ public class MainProcessor {
                                 + " --> "
                                 + serverFileInfo.info() + " "
                                 + "[" + hostname + "] " + serverFileInfo.getFullPath() + "; backup to "
-                                + backup;
+                                + backup + "\n";
                         LOGGER.info(logMessage);
+
+                        // Логируем в лог-файл на сервере
+                        String serverLogMessage = serverSysdate.replace("\n", "").replace("_", " ") + " " + locHost + " upload: "
+                                + fileRoute.getLocalFile().getFullPath() + " "
+                                + fileRoute.getLocalFile().info()
+                                + " --> "
+                                + serverFileInfo.info() + " "
+                                + "[" + hostname + "] " + serverFileInfo.getFullPath() + "; backup to "
+                                + backup;
+                        String reslog = ShellExecutor.shell(hostname, SET_MESSAGE_TO_SERVER_LOG_FILE.replace("*", serverLogMessage));
 
                     }
                 }).collect(Collectors.toList());
+
 
 
         // String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + files.get(0).getName());

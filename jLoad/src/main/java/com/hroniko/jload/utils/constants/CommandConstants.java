@@ -37,4 +37,11 @@ public interface CommandConstants {
     String RENAME_FILE = "mv "; // + добавить имя старого файла + имя нового файла: mv file newfile
 
     String UPLOAD_FILE_FROM_LOCAL_TO_SERVER = "put "; // + добавить имя локального файла + имя серверного файла: put /media/hroniko/DATA/WORK/jLoad/README.md /u02/netcracker/toms/u39_i2_6955/logs/anbe/README.md
+
+    String GET_LOCAL_MACHINE_NAME = "host $(echo $SSH_CONNECTION | cut -d ' ' -f 1) | cut -d ' ' -f 5"; // вернет адрес с точкой на конце, надо уудалять ее wsmvr-154.netcracker.com.
+
+    String SET_MESSAGE_TO_SERVER_LOG_FILE = "echo \"*\" >> /u02/netcracker/toms/u39_i2_6955/logs/anbe/jload.log"; // заменить * на сообщение
+
+    String GET_SERVER_SYSDATE = "echo $(date +%Y-%m-%d) $(date +%H:%M:%S)"; // Вернет в формате 2018-07-23 08:41:18
+    String GET_SERVER_SYSDATE_ = "echo $(date +%Y-%m-%d)_$(date +%H-%M)"; // Вернет в формате 2018-07-23_08-41
 }
