@@ -21,21 +21,18 @@ public class MainProcessor {
     private static final Logger LOGGER = Logger.getLogger(MainProcessor.class);
 
     public String run(String hostname, List<File> files) {
-        // 1 Определяем разницу во времени между удаленным сервером TBAPI и локальным компьютером
-        //String createTxt = ShellExecutor.shell(hostname, GET_WHO_DEBUG_PORT_16955);
-        FileRoute fileRoutes = new FileRoute();
 
         // 1. Построение маршрутов замены файлов с информацией о файлах
         List<FileRoute> fileRouteList = files.stream()
-                .map(FileInfo::new)
-                .map(FileRoute::new)
-                .map(fileRoute -> {
+                .map(FileInfo::new) // Превращаем в список информации о локальных файлах,
+                .map(FileRoute::new) // затем в список маршрутов замены файлов,
+                .map(fileRoute -> { // затем достраиваем список маршрутов информацией о серверных файлах
                     String localFileName = fileRoute.getLocalFile().getName();
                     String localFileExt = fileRoute.getLocalFile().getExtension();
                     String correctLocalFileName = localFileName.replaceAll("(-)*([0-9]+\\.)*[0-9](-)*(SNAPSHOT)*", ""); // удаляем информацию о версии
                     String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + correctLocalFileName + "*." + localFileExt); // String result = ShellExecutor.shell(hostname, GET_FIND_FILE_WITH_NAME + localFileName + "*." + localFileExt);
                     if (result.length() == 0){
-                        return fileRoute;
+                        return fileRoute; // Если не нашли такого файла, просто отдаем что есть в маршруте
                     }
                     List<String> serverFiles = Arrays.asList(result.split("\n"));
                     for (String fullPath : serverFiles){
@@ -126,7 +123,7 @@ public class MainProcessor {
                                 + " --> "
                                 + serverFileInfo.info() + " "
                                 + "[" + hostname + "] " + serverFileInfo.getFullPath() + "; backup to "
-                                + backup + "\n";
+                                + backup; // + backup + "\n";
                         LOGGER.info(logMessage);
 
                         // Логируем в лог-файл на сервере
