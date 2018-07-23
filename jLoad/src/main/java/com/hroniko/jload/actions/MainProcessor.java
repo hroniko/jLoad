@@ -8,8 +8,6 @@ import com.hroniko.jload.utils.converters.LsInfoAboutFileConverter;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -20,7 +18,6 @@ import static com.hroniko.jload.utils.constants.CommandConstants.*;
 
 public class MainProcessor {
 
-    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Logger LOGGER = Logger.getLogger(MainProcessor.class);
 
     public String run(String hostname, List<File> files) {
